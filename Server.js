@@ -10,7 +10,12 @@ app.use(bodyParser.json({ extended: true }));
 app.post('/noticia', async (req, res) => {
 // { titulo: "", resumo: "", url: "" } - adiciona uma notícia, gerando um identificador (id) único
     await storage.init();
-    let noticiaArray = await storage.getItem('noticia')
+    let noticiaArray;
+    try{
+        noticiaArray =  await storage.getItem('noticia')
+    }catch {
+        noticiaArray = undefined
+    }
     if(noticiaArray === undefined){
         await storage.setItem('noticia',[{key: await getKey(), titulo: req.body.titulo, resumo:req.body.resumo, url:req.body.url}]);
     }else{
@@ -40,9 +45,7 @@ app.get('/noticia', async (req, res) => {
 });
 
 app.get('/noticia/:id', async (req, res) => {
-    await storage.init()
-    let noticiaArray = await storage.getItem('noticia')
-    let foundResult = noticiaArray.find(noticia=>noticia.key === parseInt(req.params.id))
+    let foundResult = await getNoticia(req)
     if(foundResult === undefined){
         res.status(404)
         res.send()
@@ -51,11 +54,21 @@ app.get('/noticia/:id', async (req, res) => {
         res.send(foundResult)
     }
 });
+async function getNoticia(req){
+    await storage.init()
+    let noticiaArray = await storage.getItem('noticia')
+    return noticiaArray.find(noticia=>noticia.key === parseInt(req.params.id))
+}
 
 app.post('/inscricao', async (req, res) => {
 // { email: ..} - registra o email em uma lista
     await storage.init();
-    let emailArray =  await storage.getItem('email')
+    let emailArray;
+    try{
+        emailArray =  await storage.getItem('email')
+    }catch {
+        emailArray = undefined
+    }
     if(emailArray === undefined){
         await storage.setItem('email',[{email: req.body.email}])
     }else{
@@ -65,6 +78,8 @@ app.post('/inscricao', async (req, res) => {
     res.status(200)
     res.send({email: req.body.email})
 });
+
+
 
 app.listen(3000, () => {
     console.log(`Example app listening at http://localhost:3000`);
