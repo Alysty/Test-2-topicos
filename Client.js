@@ -48,3 +48,19 @@ axios.post("http://localhost:3000/inscricao", {
 })
     .then(res=>console.log("fourth email post: " + res.status))
     .catch(err=>console.log(err))
+
+axios.get("http://localhost:3000/noticia")
+    .then((res)=> {
+        let noticiaArray = res.data
+        if(typeof (noticiaArray) != "object"){
+            console.log("No noticias available")
+        }else{
+            axios.get("http://localhost:3000/noticia/"+ noticiaArray[0].key)
+                .then(res=>console.log(res.data))
+                .catch(err=>console.log(err))
+            axios.put("http://localhost:3000/noticia/"+ noticiaArray[0].key)
+                .then(res=>console.log(res.data))
+                .catch(err=>console.log(err))
+        }
+    })
+    .catch(err=>console.log(err))
